@@ -2,10 +2,14 @@
   "background_color": "#ffffff",
   "dir": "ltr",
   "display": "standalone",
-  "name": "braz-30.github",
+  "name": "Truth&amp;Dare",
   "orientation": "any",
-  "scope": "/",
-  "short_name": "braz-30.github",
-  "start_url": "/",
-  "theme_color": "#6c63ff"
+  "scope": "/Truth-Dare/",
+  "short_name": "Truth&amp;Dare",
+  "start_url": "/Truth-Dare/",
+  "theme_color": "#6c63ff",
+  "id": "com.truthdare",
+  "description": "Spin &amp; Dare is the ultimate Truth or Dare party game. Add players, spin the wheel or roll the dice, answer fun truths, complete daring challenges, and create your own custom questions. Perfect for parties, friends, couples, and family game nights.",
+  "lang": "en",
+  "prefer_related_applications": false
 }
