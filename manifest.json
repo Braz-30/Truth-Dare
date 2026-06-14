@@ -1,0 +1,11 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "braz-30.github",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "braz-30.github",
+  "start_url": "/",
+  "theme_color": "#6c63ff"
+}
