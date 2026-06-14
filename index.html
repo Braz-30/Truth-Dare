@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Truth & Dare</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0f0b1e;--bg2:#1a1530;--bg3:#241e3d;--card:#2d2650;
+  --accent:#a855f7;--accent2:#ec4899;--accent3:#f59e0b;
+  --truth:#3b82f6;--dare:#ef4444;
+  --text:#f1f0ff;--text2:#a89bc8;--text3:#6b5f8a;
+  --green:#22c55e;--border:#3d3560;
+  --radius:16px;--radius-sm:10px;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overflow:hidden}
+.screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;background:var(--bg);overflow-y:auto;transition:opacity .3s,transform .3s;opacity:0;pointer-events:none;transform:translateY(20px)}
+.screen.active{opacity:1;pointer-events:all;transform:translateY(0)}
+.container{width:100%;max-width:420px;padding:1.5rem 1.25rem;flex:1;display:flex;flex-direction:column}
+ 
+/* Buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.85rem 1.5rem;border-radius:var(--radius-sm);font-size:1rem;font-weight:600;border:none;cursor:pointer;transition:transform .12s,filter .12s;letter-spacing:.01em}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 20px rgba(168,85,247,.35)}
+.btn-secondary{background:var(--card);color:var(--text);border:1.5px solid var(--border)}
+.btn-truth{background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;box-shadow:0 4px 20px rgba(59,130,246,.4)}
+.btn-dare{background:linear-gradient(135deg,#ef4444,#f59e0b);color:#fff;box-shadow:0 4px 20px rgba(239,68,68,.4)}
+.btn-ghost{background:transparent;color:var(--text2);border:1.5px solid var(--border)}
+.btn-danger{background:rgba(239,68,68,.15);color:#ef4444;border:1.5px solid rgba(239,68,68,.3)}
+.btn-sm{padding:.55rem 1rem;font-size:.875rem;border-radius:8px;width:auto}
+.btn-icon{width:40px;height:40px;border-radius:50%;padding:0;background:var(--card);border:1.5px solid var(--border);color:var(--text);font-size:1.1rem;cursor:pointer;transition:transform .12s}
+.btn-icon:active{transform:scale(.92)}
+ 
+/* Cards */
+.card{background:var(--card);border-radius:var(--radius);padding:1.25rem;border:1.5px solid var(--border)}
+ 
+/* Header */
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-top:.5rem}
+.header h1{font-size:1.25rem;font-weight:700}
+.back-btn{background:var(--card);border:1.5px solid var(--border);color:var(--text);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;transition:transform .12s}
+.back-btn:active{transform:scale(.92)}
+ 
+/* Input */
+.input{width:100%;background:var(--bg3);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.75rem 1rem;color:var(--text);font-size:1rem;outline:none;transition:border-color .2s}
+.input:focus{border-color:var(--accent)}
+.input::placeholder{color:var(--text3)}
+ 
+/* Misc */
+.badge{display:inline-flex;align-items:center;padding:.25rem .65rem;border-radius:20px;font-size:.75rem;font-weight:600}
+.badge-purple{background:rgba(168,85,247,.2);color:#c084fc}
+.badge-blue{background:rgba(59,130,246,.2);color:#60a5fa}
+.badge-red{background:rgba(239,68,68,.2);color:#f87171}
+.gap{display:flex;flex-direction:column;gap:.75rem}
+.gap-sm{display:flex;flex-direction:column;gap:.5rem}
+.row{display:flex;align-items:center;gap:.5rem}
+.space-between{justify-content:space-between}
+.flex1{flex:1}
+.text-center{text-align:center}
+.text-muted{color:var(--text2)}
+.text-small{font-size:.875rem}
+.text-xs{font-size:.75rem}
+label{font-size:.875rem;color:var(--text2);margin-bottom:.35rem;display:block}
+.divider{height:1px;background:var(--border);margin:.75rem 0}
+.empty{text-align:center;padding:2rem;color:var(--text3)}
+ 
+/* ===== SPLASH ===== */
+#splash{background:var(--bg);justify-content:center}
+.splash-logo{font-size:5rem;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.splash-title{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:.5rem 0}
+.splash-sub{color:var(--text2);font-size:1rem}
+.splash-bar{width:200px;height:4px;background:var(--bg3);border-radius:4px;margin:2rem auto;overflow:hidden}
+.splash-bar-inner{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:4px;animation:load 1.8s ease forwards}
+@keyframes load{from{width:0}to{width:100%}}
+ 
+/* ===== HOME ===== */
+.home-hero{text-align:center;padding:2rem 0 1.5rem}
+.home-icon{font-size:3.5rem;display:block;margin-bottom:.75rem}
+.home-title{font-size:2rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.home-tagline{color:var(--text2);margin-top:.35rem}
+.home-menu{display:flex;flex-direction:column;gap:.75rem;margin-top:1.5rem}
+.menu-item{display:flex;align-items:center;gap:1rem;background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;cursor:pointer;transition:border-color .2s,transform .12s}
+.menu-item:active{transform:scale(.98)}
+.menu-item:hover{border-color:var(--accent)}
+.menu-icon{font-size:1.75rem;width:48px;height:48px;background:var(--bg3);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.menu-label{font-weight:600;font-size:1.05rem}
+.menu-sub{font-size:.8rem;color:var(--text2);margin-top:.15rem}
+ 
+/* ===== PLAYER SETUP ===== */
+.player-list{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem}
+.player-item{display:flex;align-items:center;gap:.75rem;background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.65rem 1rem;transition:border-color .2s}
+.player-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.875rem;flex-shrink:0}
+.player-name-text{flex:1;font-weight:500}
+.player-actions{display:flex;gap:.35rem}
+.player-actions button{background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:1rem;padding:.25rem;border-radius:6px;transition:color .2s}
+.player-actions button:hover{color:var(--text)}
+.player-count{font-size:.8rem;color:var(--text3);text-align:center;margin:.75rem 0 .25rem}
+ 
+/* ===== SELECTION MODE ===== */
+.mode-cards{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem}
+.mode-card{background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:1.25rem;text-align:center;cursor:pointer;transition:border-color .2s,transform .12s}
+.mode-card:active{transform:scale(.97)}
+.mode-card.selected{border-color:var(--accent);background:rgba(168,85,247,.1)}
+.mode-card-icon{font-size:2.5rem;margin-bottom:.5rem}
+.mode-card-label{font-weight:600;font-size:0.95rem}
+.mode-card-sub{font-size:.75rem;color:var(--text2);margin-top:.25rem}
+ 
+/* ===== WHEEL ===== */
+.wheel-wrap{position:relative;display:flex;align-items:center;justify-content:center;margin:1rem 0}
+#wheelCanvas{border-radius:50%;display:block}
+.wheel-center{position:absolute;width:50px;height:50px;background:var(--bg);border-radius:50%;border:3px solid var(--bg3)}
+.score-btn{position:absolute;right:-120px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:.6rem;padding:.7rem 1rem;border-radius:999px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;box-shadow:0 6px 24px rgba(168,85,247,.18);cursor:pointer}
+.score-list{max-height:60vh;overflow:auto;padding:0;margin:0}
+.score-row{display:flex;align-items:center;justify-content:space-between;padding:.6rem .8rem;border-bottom:1px solid rgba(255,255,255,.03)}
+.score-name{font-weight:600}
+.score-counts{color:var(--text2);font-size:.95rem}
+.spin-btn-wrap{text-align:center;margin:1rem 0}
+#spinBtn{width:auto;padding:.85rem 3rem;border-radius:50px;font-size:1.1rem}
+#spinBtn:disabled{opacity:.5;cursor:not-allowed}
+.current-round{text-align:center;color:var(--text2);font-size:.875rem;margin-bottom:.5rem}
+ 
+/* ===== DICE ===== */
+.dice-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 0;gap:1.5rem}
+.dice{width:120px;height:120px;background:linear-gradient(135deg,var(--bg3),var(--card));border:3px solid var(--border);border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:3.5rem;cursor:pointer;transition:transform .1s;position:relative;overflow:hidden}
+.dice.rolling{animation:diceRoll .6s ease}
+@keyframes diceRoll{0%{transform:rotate(0) scale(1)}25%{transform:rotate(180deg) scale(.9)}50%{transform:rotate(360deg) scale(1.1)}75%{transform:rotate(540deg) scale(.95)}100%{transform:rotate(720deg) scale(1)}}
+.dice-faces{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:12px}
+.dot{width:16px;height:16px;border-radius:50%;background:var(--text)}
+ 
+/* ===== TRUTH/DARE ===== */
+.td-player{text-align:center;margin:1.5rem 0}
+.td-avatar{width:80px;height:80px;border-radius:50%;margin:0 auto .75rem;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800}
+.td-name{font-size:1.5rem;font-weight:700}
+.td-prompt{color:var(--text2);margin-top:.25rem}
+.td-choices{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:2rem}
+.td-choice{border-radius:var(--radius);padding:1.75rem 1rem;text-align:center;cursor:pointer;border:2px solid transparent;transition:transform .12s,filter .12s}
+.td-choice:active{transform:scale(.96)}
+.td-choice-icon{font-size:2.5rem;margin-bottom:.5rem}
+.td-choice-label{font-size:1.1rem;font-weight:700}
+.td-choice-truth{background:linear-gradient(135deg,rgba(59,130,246,.2),rgba(99,102,241,.2));border-color:rgba(59,130,246,.4)}
+.td-choice-dare{background:linear-gradient(135deg,rgba(239,68,68,.2),rgba(245,158,11,.2));border-color:rgba(239,68,68,.4)}
+
+/* ===== QUESTION ===== */
+.question-badge{text-align:center;margin-bottom:1.5rem}
+.question-card{border-radius:var(--radius);padding:2rem 1.5rem;text-align:center;min-height:200px;display:flex;align-items:center;justify-content:center;margin:1rem 0}
+.question-card-truth{background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(99,102,241,.15));border:2px solid rgba(59,130,246,.3)}
+.question-card-dare{background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(245,158,11,.15));border:2px solid rgba(239,68,68,.3)}
+.question-text{font-size:1.2rem;font-weight:600;line-height:1.6}
+.question-player{color:var(--text2);font-size:.875rem;margin-bottom:.5rem}
+.question-actions{display:flex;gap:.75rem;margin-top:1rem}
+.question-actions .btn{flex:1}
+ 
+/* ===== CELEBRATION ===== */
+.confetti-container{position:fixed;inset:0;pointer-events:none;z-index:100;overflow:hidden}
+.confetti-piece{position:absolute;width:10px;height:10px;top:-10px;animation:confettiFall linear forwards}
+@keyframes confettiFall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+ 
+/* ===== CUSTOM QUESTIONS ===== */
+.q-tabs{display:flex;background:var(--bg3);border-radius:var(--radius-sm);padding:4px;margin-bottom:1rem}
+.q-tab{flex:1;padding:.5rem;border-radius:8px;text-align:center;cursor:pointer;font-size:.875rem;font-weight:600;color:var(--text2);transition:all .2s}
+.q-tab.active{background:var(--card);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.q-item{display:flex;align-items:center;gap:.75rem;background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.75rem 1rem}
+.q-item-text{flex:1;font-size:.875rem;color:var(--text2)}
+.q-item-actions{display:flex;gap:.35rem;flex-shrink:0}
+.q-item-actions button{background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:.9rem;padding:.2rem;border-radius:4px}
+.q-item-actions button:hover{color:var(--text)}
+.add-q-form{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:1rem;margin-bottom:1rem}
+ 
+/* ===== SETTINGS ===== */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:.85rem 0;border-bottom:1px solid var(--border)}
+.setting-row:last-child{border-bottom:none}
+.setting-label{font-size:1rem;font-weight:500}
+.setting-sub{font-size:.8rem;color:var(--text2);margin-top:.15rem}
+.toggle{position:relative;width:50px;height:28px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-slider{position:absolute;inset:0;background:var(--bg3);border-radius:28px;cursor:pointer;transition:background .2s}
+.toggle-slider::before{content:'';position:absolute;width:22px;height:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s}
+.toggle input:checked + .toggle-slider{background:var(--accent)}
+.toggle input:checked + .toggle-slider::before{transform:translateX(22px)}
+.seg-control{display:flex;background:var(--bg3);border-radius:8px;padding:3px;gap:3px}
+.seg-btn{flex:1;padding:.35rem .5rem;border-radius:6px;font-size:.75rem;font-weight:600;border:none;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s;white-space:nowrap}
+.seg-btn.active{background:var(--card);color:var(--text)}
+ 
+/* Edit overlay */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.overlay.show{opacity:1;pointer-events:all}
+.overlay-panel{background:var(--bg2);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:420px;padding:1.5rem;transform:translateY(100%);transition:transform .3s}
+.overlay.show .overlay-panel{transform:translateY(0)}
+.overlay-title{font-size:1.1rem;font-weight:700;margin-bottom:1rem}
+ 
+/* Responsive */
+@media(max-height:700px){.home-hero{padding:1rem 0}}
+</style>
+</head>
+<body>
+ 
+<!-- SPLASH -->
+<div class="screen active" id="splash">
+  <div class="container" style="justify-content:center;text-align:center">
+    <div class="splash-logo">🎲</div>
+    <div class="splash-title">Truth & Dare</div>
+    <div class="splash-sub">The party game that never gets boring</div>
+    <div class="splash-bar"><div class="splash-bar-inner"></div></div>
+  </div>
+</div>
+ 
+<!-- HOME -->
+<div class="screen" id="home">
+  <div class="container">
+    <div class="home-hero">
+      <span class="home-icon">🎉</span>
+      <div class="home-title">Truth & Dare</div>
+      <div class="home-tagline">Who's up next?</div>
+    </div>
+    <div class="home-menu">
+      <div class="menu-item" onclick="goTo('players')">
+        <div class="menu-icon">🎮</div>
+        <div>
+          <div class="menu-label">Play Game</div>
+          <div class="menu-sub">Add players and start spinning</div>
+        </div>
+        <span style="color:var(--text3);font-size:1.2rem">›</span>
+      </div>
+      <div class="menu-item" onclick="goTo('customQ')">
+        <div class="menu-icon">✏️</div>
+        <div>
+          <div class="menu-label">Manage Questions</div>
+          <div class="menu-sub">Add your own truths & dares</div>
+        </div>
+        <span style="color:var(--text3);font-size:1.2rem">›</span>
+      </div>
+      <div class="menu-item" onclick="goTo('settings')">
+        <div class="menu-icon">⚙️</div>
+        <div>
+          <div class="menu-label">Settings</div>
+          <div class="menu-sub">Sound, mode, and preferences</div>
+        </div>
+        <span style="color:var(--text3);font-size:1.2rem">›</span>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:auto;padding-top:2rem;color:var(--text3);font-size:.75rem">Truth & Dare • Offline Party Game</div>
+  </div>
+</div>
+ 
+<!-- PLAYERS -->
+<div class="screen" id="players">
+  <div class="container">
+    <div class="header">
+      <button class="back-btn" onclick="goTo('home')">‹</button>
+      <h1>Players</h1>
+      <div style="width:40px"></div>
+    </div>
+    <div class="row" style="gap:.5rem;margin-bottom:1rem">
+      <input class="input flex1" id="playerInput" placeholder="Enter player name…" maxlength="20" onkeydown="if(event.key==='Enter')addPlayer()">
+      <button class="btn btn-primary btn-sm" onclick="addPlayer()">Add</button>
+    </div>
+    <div id="playerCount" class="player-count"></div>
+    <div id="playerList" class="player-list"></div>
+    <div style="flex:1"></div>
+    <button class="btn btn-primary" id="startGameBtn" onclick="startGame()" disabled>
+      <span>🎯</span> Let's Play!
+    </button>
+  </div>
+</div>
+
+<!-- SELECTION MODE -->
+<div class="screen" id="selectionMode">
+  <div class="container">
+    <div class="header">
+      <button class="back-btn" onclick="goTo('players')">‹</button>
+      <h1>Select Player</h1>
+      <div style="width:40px"></div>
+    </div>
+    <div class="current-round" id="roundCounter">Round 1</div>
+    <div class="mode-cards">
+      <div class="mode-card" id="modeWheel" onclick="selectMode('wheel')">
+        <div class="mode-card-icon">🎡</div>
+        <div class="mode-card-label">Spin Wheel</div>
+        <div class="mode-card-sub">Watch it spin!</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="continueBtn" onclick="continueToSpin()">Continue →</button>
+  </div>
+</div>
+
+<!-- WHEEL -->
+<div class="screen" id="wheelScreen">
+  <div class="container">
+    <div class="header">
+      <button class="back-btn" onclick="goTo('selectionMode')">‹</button>
+      <h1>Spin the Wheel</h1>
+      <div style="width:40px"></div>
+    </div>
+    <div class="current-round" id="wheelRoundCounter"></div>
+    <div class="wheel-wrap">
+      <canvas id="wheelCanvas" width="300" height="300"></canvas>
+      <div class="wheel-center"></div>
+      <button id="scoreBtn" class="score-btn" onclick="openScoreboard()">📊 Scoreboard</button>
+    </div>
+    <div class="spin-btn-wrap">
+      <button class="btn btn-primary" id="spinBtn" onclick="spinWheel()">🎡 Spin!</button>
+    </div>
+    <div id="wheelResult" style="text-align:center;font-size:1.2rem;font-weight:700;min-height:40px;color:var(--accent)"></div>
+  </div>
+</div>
+
+<!-- DICE -->
+<div class="screen" id="diceScreen">
+  <div class="container">
+    <div class="header">
+      <button class="back-btn" onclick="goTo('selectionMode')">‹</button>
+      <h1>Roll the Dice</h1>
+      <div style="width:40px"></div>
+    </div>
+    <div class="current-round" id="diceRoundCounter"></div>
+    <div class="dice-wrap">
+      <div class="dice" id="diceEl" onclick="rollDice()">
+        <div id="diceFace" style="font-size:3.5rem">🎲</div>
+      </div>
+      <div style="color:var(--text2);font-size:.875rem">Tap the dice to roll!</div>
+      <div id="diceResult" style="font-size:1.2rem;font-weight:700;color:var(--accent);min-height:2rem;text-align:center"></div>
+    </div>
+    <div style="flex:1"></div>
+    <button class="btn btn-primary" id="diceNextBtn" style="display:none" onclick="diceNext()">Continue →</button>
+  </div>
+</div>
+
+<!-- TRUTH OR DARE -->
+<div class="screen" id="tdScreen">
+  <div class="container">
+    <div class="header">
+      <div style="width:40px"></div>
+      <h1>Truth or Dare?</h1>
+      <div style="width:40px"></div>
+    </div>
+    <div class="td-player">
+      <div class="td-avatar" id="tdAvatar"></div>
+      <div class="td-name" id="tdName"></div>
+      <div class="td-prompt">What do you choose?</div>
+    </div>
+    <div class="td-choices">
+      <div class="td-choice td-choice-truth" onclick="pickTruth()">
+        <div class="td-choice-icon">💬</div>
+        <div class="td-choice-label">Truth</div>
+      </div>
+      <div class="td-choice td-choice-dare" onclick="pickDare()">
+        <div class="td-choice-icon">🔥</div>
+        <div class="td-choice-label">Dare</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUESTION -->
+<div class="screen" id="questionScreen">
+  <div class="container">
+    <div class="header">
+      <div style="width:40px"></div>
+      <h1 id="questionType">Truth</h1>
+      <div style="width:40px"></div>
+    </div>
+    <div class="question-badge" id="questionBadge"></div>
+    <div class="question-player" id="questionPlayer"></div>
+    <div id="scoreRecord" style="text-align:center;margin-bottom:.5rem;color:var(--text2)"></div>
+    <div class="question-card" id="questionCard">
+      <div class="question-text" id="questionText"></div>
+    </div>
+    <div class="question-actions">
+      <button class="btn btn-danger" onclick="markFailed()">❌ Failed</button>
+      <button class="btn btn-primary" onclick="markDone()">✅ Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOM QUESTIONS -->
+<div class="screen" id="customQ">
+  <div class="container">
+    <div class="header">
+      <button class="back-btn" onclick="goTo('home')">‹</button>
+      <h1>My Questions</h1>
+      <div style="width:40px"></div>
+    </div>
+    <div class="q-tabs">
+      <div class="q-tab active" id="tabTruth" onclick="switchQTab('truth')">Truths (<span id="truthCount">0</span>)</div>
+      <div class="q-tab" id="tabDare" onclick="switchQTab('dare')">Dares (<span id="dareCount">0</span>)</div>
+    </div>
+    <div class="add-q-form">
+      <label id="addQLabel">Add a Truth</label>
+      <div class="row" style="gap:.5rem">
+        <input class="input flex1" id="newQInput" placeholder="Type your question…" maxlength="200">
+        <button class="btn btn-primary btn-sm" onclick="addCustomQ()">Add</button>
+      </div>
+    </div>
+    <div id="customQList" class="gap-sm" style="overflow-y:auto;max-height:55vh"></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="screen" id="settings">
+  <div class="container">
+    <div class="header">
+      <button class="back-btn" onclick="goTo('home')">‹</button>
+      <h1>Settings</h1>
+      <div style="width:40px"></div>
+    </div>
+    <div class="card gap" style="margin-bottom:.75rem">
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Sound Effects</div>
+          <div class="setting-sub">Button clicks & animations</div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="soundToggle" onchange="saveSetting('sound',this.checked)"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Vibration</div>
+          <div class="setting-sub">Haptic feedback</div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="vibToggle" onchange="saveSetting('vibration',this.checked)"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="card gap" style="margin-bottom:.75rem">
+      <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:.75rem">
+        <div>
+          <div class="setting-label">Selection Mode</div>
+          <div class="setting-sub">How players are chosen</div>
+        </div>
+        <div class="seg-control" style="width:100%">
+          <button class="seg-btn" id="selWheel" onclick="saveSetting('selectionMode','wheel');setSegActive('sel','wheel')">🎡 Wheel</button>
+        </div>
+      </div>
+      <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:.75rem">
+        <div>
+          <div class="setting-label">Question Source</div>
+          <div class="setting-sub">Which questions to use</div>
+        </div>
+        <div class="seg-control" style="width:100%">
+          <button class="seg-btn" id="qDefault" onclick="saveSetting('questionMode','default');setSegActive('q','default')">Built-in</button>
+          <button class="seg-btn" id="qCustom" onclick="saveSetting('questionMode','custom');setSegActive('q','custom')">Custom</button>
+          <button class="seg-btn" id="qMixed" onclick="saveSetting('questionMode','mixed');setSegActive('q','mixed')">Mixed</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="setting-label" style="font-size:1rem;margin-bottom:.75rem">Danger Zone</div>
+      <button class="btn btn-danger" onclick="confirmReset()">🗑️ Reset All Data</button>
+    </div>
+    <div style="margin-top:1rem;text-align:center;color:var(--text3);font-size:.75rem">Truth & Dare v1.0 • Offline Ready</div>
+  </div>
+</div>
+
+<!-- EDIT OVERLAY -->
+<div class="overlay" id="editOverlay" onclick="closeOverlay(event)">
+  <div class="overlay-panel">
+    <div class="overlay-title" id="overlayTitle">Edit</div>
+    <input class="input" id="overlayInput" style="margin-bottom:1rem">
+    <div class="row" style="gap:.5rem">
+      <button class="btn btn-secondary flex1" onclick="closeOverlay()">Cancel</button>
+      <button class="btn btn-primary flex1" onclick="saveOverlayEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFETTI -->
+<div class="confetti-container" id="confetti"></div>
+
+<!-- SCOREBOARD OVERLAY -->
+<div class="overlay" id="scoreboardOverlay">
+  <div class="overlay-panel" style="max-width:480px;padding:1rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+      <div style="font-weight:700">Scoreboard</div>
+      <button class="btn btn-sm btn-ghost" onclick="closeScoreboard()">Close</button>
+    </div>
+    <div id="scoreboardContent" style="background:transparent;border-radius:8px;overflow:hidden">
+      <ul class="score-list" id="scoreList"></ul>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== DATA ==========
+const COLORS = ['#a855f7','#ec4899','#3b82f6','#22c55e','#f59e0b','#ef4444','#06b6d4','#8b5cf6','#f97316','#14b8a6','#e11d48','#7c3aed'];
+ 
+const BUILT_IN_TRUTHS = [
+"What's the most embarrassing thing you've done in public?","What's your biggest fear?","Have you ever lied to get out of trouble? What about?","What's the worst gift you've ever received?","What's something you've never told anyone?","Have you ever cheated on a test?","What's your most embarrassing nickname?","What's the longest you've gone without showering?","Have you ever pretended to be sick to avoid something?","What's the most childish thing you still do?","Have you ever stalked someone on social media?","What's your most embarrassing memory from school?","Have you ever had a crush on a teacher?","What's the most ridiculous thing you've cried about?","Have you ever blamed someone else for something you did?","What's the pettiest thing you've ever done?","What's your most shameful guilty pleasure?","Have you ever read someone else's diary or messages?","What's the biggest lie you've ever told your parents?","Have you ever sent a message to the wrong person?","What's the weirdest dream you've had?","Have you ever walked into a glass door?","What's something weird you do when you're alone?","Have you ever pretended not to see someone to avoid talking?","What's the most embarrassing song on your playlist?","Have you ever tripped and fallen in front of a crowd?","What's the strangest thing you've Googled?","Have you ever accidentally called a teacher 'mom' or 'dad'?","What's your most embarrassing bathroom story?","Have you ever cried at an embarrassing movie?","What's the most awkward date or hangout you've been on?","Have you ever said 'I love you' by accident?","What's something you pretend to like but actually hate?","Have you ever forgotten someone's name you should know?","What's the most embarrassing photo you have of yourself?","Have you ever eaten food that fell on the floor?","What's your biggest social media regret?","Have you ever ghosted someone? Why?","What's the most embarrassing thing you've said when nervous?","Have you ever had a wardrobe malfunction?"
+];
+ 
+const BUILT_IN_DARES = [
+"Do your best impression of the person to your left.","Sing the chorus of a song chosen by the group.","Do 20 jumping jacks right now.","Let someone write something on your face with a marker.","Speak in an accent for the next 3 rounds.","Call a random contact and sing them Happy Birthday.","Do your best robot dance for 30 seconds.","Let the group go through your camera roll for 60 seconds.","Send a funny selfie to someone in your contacts.","Do a cartwheel or attempt one.","Talk in a whisper for the next 3 rounds.","Eat a spoonful of something spicy.","Do your best celebrity impression.","Let someone style your hair however they want for the rest of the game.","Speak only in rhymes for the next 2 rounds.","Do your best moonwalk across the room.","Take a selfie with the weirdest face you can make and post it to your story.","Text your crush or last contact something the group decides.","Do 10 push-ups right now.","Walk like a crab across the room.","Let the group choose your phone wallpaper for the rest of the game.","Say the alphabet backwards as fast as you can.","Do your best air guitar solo.","Make up a rap about the person to your right.","Call a family member and say 'I know what you did.'","Try to lick your elbow.","Act out a movie scene without words and let the group guess.","Talk without closing your mouth properly for 2 rounds.","Pretend to be a news anchor and deliver the most boring news ever.","Do a dramatic death scene.","Let someone smell your shoes and describe the scent.","Do your best impression of a baby being born.","Wear your clothes backwards for the next 3 rounds.","Act like your favorite animal for the next round.","Text 'I love you' to someone random in your contacts.","Do the worm.","Let the group change your relationship status on social media.","Attempt to do a split.","Walk outside and shout 'I am the champion!' at the top of your lungs.","Put 5 different food items in a cup and drink it."
+];
+ 
+// ========== STATE ==========
+let state = {
+  players: [],
+  settings: { sound: true, vibration: true, selectionMode: 'wheel', questionMode: 'mixed' },
+  customTruths: [],
+  customDares: [],
+  recentQ: [],
+  currentPlayer: null,
+  currentType: null,
+  round: 1,
+  currentQTab: 'truth',
+  editingQ: null,
+  editingQType: null,
+  scores: {},
+};
+ 
+// ========== STORAGE ==========
+function save() {
+  try {
+    localStorage.setItem('spindare', JSON.stringify({
+      players: state.players,
+      settings: state.settings,
+      customTruths: state.customTruths,
+      customDares: state.customDares,
+      recentQ: state.recentQ.slice(-40),
+      scores: state.scores || {},
+    }));
+  } catch(e) {}
+}
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem('spindare') || '{}');
+    if (d.players) state.players = d.players;
+    if (d.settings) state.settings = { ...state.settings, ...d.settings };
+    if (d.customTruths) state.customTruths = d.customTruths;
+    if (d.customDares) state.customDares = d.customDares;
+    if (d.recentQ) state.recentQ = d.recentQ;
+    if (d.scores) state.scores = d.scores;
+  } catch(e) {}
+}
+ 
+// ========== NAVIGATION ==========
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const s = document.getElementById(id);
+  if (s) s.classList.add('active');
+  onScreenEnter(id);
+}
+function onScreenEnter(id) {
+  if (id === 'players') renderPlayers();
+  if (id === 'customQ') renderCustomQ();
+  if (id === 'settings') renderSettings();
+  if (id === 'wheelScreen') { renderWheel(); document.getElementById('wheelResult').textContent = ''; }
+  if (id === 'diceScreen') { document.getElementById('diceResult').textContent = ''; document.getElementById('diceNextBtn').style.display = 'none'; document.getElementById('diceFace').textContent = '🎲'; }
+  if (id === 'selectionMode') {
+    document.getElementById('roundCounter').textContent = `Round ${state.round}`;
+    const mode = state.settings.selectionMode;
+    document.getElementById('modeWheel').classList.toggle('selected', mode === 'wheel');
+    state._chosenMode = mode;
+  }
+  if (id === 'wheelScreen') document.getElementById('wheelRoundCounter').textContent = `Round ${state.round}`;
+  if (id === 'diceScreen') document.getElementById('diceRoundCounter').textContent = `Round ${state.round}`;
+}
+
+// ========== PLAYERS ==========
+function addPlayer() {
+  const inp = document.getElementById('playerInput');
+  const name = inp.value.trim();
+  if (!name) return;
+  if (state.players.length >= 20) return alert('Maximum 20 players!');
+  if (state.players.some(p => p.name.toLowerCase() === name.toLowerCase())) return alert('Player already exists!');
+  state.players.push({ id: Date.now().toString(), name });
+  inp.value = '';
+  save();
+  renderPlayers();
+  vibrate();
+}
+function removePlayer(id) {
+  state.players = state.players.filter(p => p.id !== id);
+  save();
+  renderPlayers();
+}
+function editPlayerStart(id) {
+  const p = state.players.find(x => x.id === id);
+  if (!p) return;
+  openOverlay('Edit Player Name', p.name, (val) => {
+    if (!val) return;
+    if (state.players.some(x => x.id !== id && x.name.toLowerCase() === val.toLowerCase())) return alert('Name taken!');
+    p.name = val;
+    save();
+    renderPlayers();
+  });
+}
+function renderPlayers() {
+  const list = document.getElementById('playerList');
+  const count = document.getElementById('playerCount');
+  const btn = document.getElementById('startGameBtn');
+  count.textContent = `${state.players.length} / 20 players${state.players.length < 2 ? ' (need at least 2)' : ''}`;
+  btn.disabled = state.players.length < 2;
+  list.innerHTML = '';
+  state.players.forEach((p, i) => {
+    const color = COLORS[i % COLORS.length];
+    const initials = p.name.slice(0, 2).toUpperCase();
+    list.innerHTML += `
+      <div class="player-item">
+        <div class="player-avatar" style="background:${color}22;color:${color}">${initials}</div>
+        <div class="player-name-text">${escHtml(p.name)}</div>
+        <div class="player-actions">
+          <button onclick="editPlayerStart('${p.id}')" title="Edit">✏️</button>
+          <button onclick="removePlayer('${p.id}')" title="Remove">🗑️</button>
+        </div>
+      </div>`;
+  });
+}
+
+function startGame() {
+  if (state.players.length < 2) return;
+  state.round = 1;
+  state.recentQ = [];
+  goTo('selectionMode');
+}
+
+// ========== SELECTION MODE ==========
+function selectMode(m) {
+  state._chosenMode = m;
+  document.getElementById('modeWheel').classList.toggle('selected', m === 'wheel');
+}
+function continueToSpin() { goTo('wheelScreen'); }
+
+// ========== WHEEL ==========
+let wheelAngle = 0;
+let wheelSpinning = false;
+function renderWheel() {
+  const canvas = document.getElementById('wheelCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const size = Math.min(canvas.width, canvas.height);
+  const cx = size / 2, cy = size / 2;
+  const r = Math.floor(size / 2) - 8;
+  const n = Math.max(1, state.players.length);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const anglePer = (Math.PI * 2) / n;
+  for (let i = 0; i < n; i++) {
+    const start = wheelAngle + i * anglePer - Math.PI / 2;
+    const end = start + anglePer;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, end);
+    ctx.closePath();
+    ctx.fillStyle = COLORS[i % COLORS.length];
+    ctx.fill();
+    ctx.strokeStyle = '#0f0b1e';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // label
+    ctx.save();
+    const mid = (start + end) / 2;
+    ctx.translate(cx, cy);
+    ctx.rotate(mid);
+    ctx.fillStyle = '#fff';
+    ctx.font = `bold ${Math.min(14, Math.floor(r / (n > 6 ? 8 : 5)))}px -apple-system,sans-serif`;
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    const label = state.players[i]?.name?.slice(0, 12) || `Player ${i+1}`;
+    ctx.fillText(label, r - 10, 0);
+    ctx.restore();
+  }
+
+  // center circle
+  ctx.beginPath();
+  ctx.arc(cx, cy, Math.max(20, Math.min(30, size * 0.08)), 0, Math.PI * 2);
+  ctx.fillStyle = '#0f0b1e';
+  ctx.fill();
+  // highlight slice under pointer (top)
+  try {
+    const anglePer = (Math.PI * 2) / n;
+    const angleFromZero = ((-wheelAngle + Math.PI / 2) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+    const idxUnder = Math.floor(angleFromZero / anglePer) % n;
+    // draw stroke around that slice
+    const s = wheelAngle + idxUnder * anglePer - Math.PI / 2;
+    const e = s + anglePer;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r + 4, s, e);
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+  } catch (e) {}
+}
+
+ 
+// ========== DICE ==========
+const DICE_FACES = ['⚀','⚁','⚂','⚄','⚅'];
+let diceRolling = false;
+function rollDice() {
+  if (diceRolling) return;
+  diceRolling = true;
+  document.getElementById('diceResult').textContent = '';
+  document.getElementById('diceNextBtn').style.display = 'none';
+  const el = document.getElementById('diceEl');
+  const face = document.getElementById('diceFace');
+  el.classList.add('rolling');
+  vibrate();
+  let ticks = 0;
+  const interval = setInterval(() => {
+    face.textContent = DICE_FACES[Math.floor(Math.random() * DICE_FACES.length)];
+    ticks++;
+    if (ticks > 14) {
+      clearInterval(interval);
+      el.classList.remove('rolling');
+      const idx = Math.floor(Math.random() * state.players.length);
+      state.currentPlayer = state.players[idx];
+      const diceIdx = Math.floor(Math.random() * DICE_FACES.length);
+      face.textContent = DICE_FACES[diceIdx];
+      document.getElementById('diceResult').textContent = `🎉 ${state.currentPlayer.name}'s Turn!`;
+      document.getElementById('diceNextBtn').style.display = 'block';
+      diceRolling = false;
+      celebrate();
+    }
+  }, 100);
+}
+function diceNext() { goTo('tdScreen'); }
+
+// ========== TRUTH OR DARE ==========
+function setupTD() {
+  const p = state.currentPlayer;
+  const idx = state.players.indexOf(p) !== -1 ? state.players.indexOf(p) : 0;
+  const color = COLORS[idx % COLORS.length];
+  const av = document.getElementById('tdAvatar');
+  av.style.background = color + '33';
+  av.style.color = color;
+  av.textContent = p.name.slice(0, 2).toUpperCase();
+  document.getElementById('tdName').textContent = p.name;
+}
+function pickTruth() { state.currentType = 'truth'; showQuestion(); }
+function pickDare() { state.currentType = 'dare'; showQuestion(); }
+
+// ========== QUESTION ==========
+function getPool(type) {
+  const mode = state.settings.questionMode;
+  let pool = [];
+  if (mode === 'default' || mode === 'mixed') {
+    pool = pool.concat(type === 'truth' ? BUILT_IN_TRUTHS : BUILT_IN_DARES);
+  }
+  if (mode === 'custom' || mode === 'mixed') {
+    const custom = type === 'truth' ? state.customTruths : state.customDares;
+    pool = pool.concat(custom.map(q => q.text));
+  }
+  if (pool.length === 0) pool = type === 'truth' ? BUILT_IN_TRUTHS : BUILT_IN_DARES;
+  return pool;
+}
+function pickQuestion(type) {
+  const pool = getPool(type);
+  const recent = new Set(state.recentQ.slice(-20));
+  let available = pool.filter(q => !recent.has(q));
+  if (available.length === 0) available = pool;
+  return available[Math.floor(Math.random() * available.length)];
+}
+function showQuestion() {
+  const type = state.currentType;
+  const q = pickQuestion(type);
+  state.recentQ.push(q);
+  if (state.recentQ.length > 60) state.recentQ = state.recentQ.slice(-60);
+  save();
+  const isT = type === 'truth';
+  document.getElementById('questionType').textContent = isT ? '💬 Truth' : '🔥 Dare';
+  document.getElementById('questionBadge').innerHTML = `<span class="badge ${isT ? 'badge-blue' : 'badge-red'}">${isT ? '💬 Truth' : '🔥 Dare'}</span>`;
+  document.getElementById('questionPlayer').textContent = `For ${state.currentPlayer.name}:`;
+  document.getElementById('questionText').textContent = q;
+  const card = document.getElementById('questionCard');
+  card.className = `question-card ${isT ? 'question-card-truth' : 'question-card-dare'}`;
+  updateScoreDisplay();
+  goTo('questionScreen');
+}
+function skipQuestion() { showQuestion(); }
+function nextRound() {
+  state.round++;
+  goTo('selectionMode');
+}
+
+function ensureScoreFor(id) {
+  if (!state.scores) state.scores = {};
+  if (!state.scores[id]) state.scores[id] = { done: 0, failed: 0 };
+}
+
+function updateScoreDisplay() {
+  const el = document.getElementById('scoreRecord');
+  if (!el) return;
+  const p = state.currentPlayer;
+  if (!p) { el.textContent = ''; return; }
+  const s = (state.scores && state.scores[p.id]) ? state.scores[p.id] : { done: 0, failed: 0 };
+  el.textContent = `Done: ${s.done} • Not done: ${s.failed}`;
+}
+
+function markDone() {
+  if (!state.currentPlayer) return;
+  ensureScoreFor(state.currentPlayer.id);
+  state.scores[state.currentPlayer.id].done++;
+  save();
+  updateScoreDisplay();
+  nextRound();
+}
+
+function markFailed() {
+  if (!state.currentPlayer) return;
+  ensureScoreFor(state.currentPlayer.id);
+  state.scores[state.currentPlayer.id].failed++;
+  save();
+  updateScoreDisplay();
+  nextRound();
+}
+  
+// ========== CUSTOM QUESTIONS ==========
+function spinWheel() {
+  if (wheelSpinning) return;
+  const n = state.players.length;
+  if (n === 0) return;
+  wheelSpinning = true;
+  document.getElementById('spinBtn').disabled = true;
+  document.getElementById('wheelResult').textContent = '';
+  // choose a random player to land on
+  const startAngle = wheelAngle;
+  const spins = 6 + Math.floor(Math.random() * 6);
+  const chosenIdx = Math.floor(Math.random() * n);
+  const anglePer = (Math.PI * 2) / n;
+  // compute desired wheelAngle so the chosen slice center aligns with the pointer at top
+  const target = Math.PI - ((chosenIdx + 0.5) * anglePer);
+  const totalSpin = (target + spins * Math.PI * 2) - startAngle;
+  const dur = 2200 + Math.random() * 1400;
+  const start = Date.now();
+  function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+  function animate() {
+    const elapsed = Date.now() - start;
+    const t = Math.min(elapsed / dur, 1);
+    wheelAngle = startAngle + totalSpin * easeOut(t);
+    renderWheel();
+    
+    if (t < 1) requestAnimationFrame(animate);
+    else {
+      wheelAngle = startAngle + totalSpin; // snap
+      wheelSpinning = false;
+      document.getElementById('spinBtn').disabled = false;
+      // final index computed from wheelAngle to be robust
+      const anglePer = (Math.PI * 2) / n;
+      const angleFromZero = ((-wheelAngle + Math.PI / 2) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+      const idx = Math.floor(angleFromZero / anglePer) % n;
+      state.currentPlayer = state.players[idx];
+      document.getElementById('wheelResult').textContent = `🎉 ${state.currentPlayer.name}'s Turn!`;
+      celebrate();
+      setTimeout(() => goTo('tdScreen'), 900);
+    }
+  }
+  requestAnimationFrame(animate);
+  playTick();
+}
+
+function editCustomQ(id) {
+  const type = state.currentQTab;
+  const arr = type === 'truth' ? state.customTruths : state.customDares;
+  const q = arr.find(x => x.id === id);
+  if (!q) return;
+  state.editingQ = id;
+  state.editingQType = type;
+  openOverlay(`Edit ${type === 'truth' ? 'Truth' : 'Dare'}`, q.text, (val) => {
+    if (!val) return;
+    q.text = val;
+    save();
+    renderCustomQ();
+  });
+}
+function renderCustomQ() {
+  const type = state.currentQTab;
+  const arr = type === 'truth' ? state.customTruths : state.customDares;
+  document.getElementById('truthCount').textContent = state.customTruths.length;
+  document.getElementById('dareCount').textContent = state.customDares.length;
+  const list = document.getElementById('customQList');
+  if (arr.length === 0) {
+    list.innerHTML = `<div class="empty">No custom ${type === 'truth' ? 'truths' : 'dares'} yet.<br>Add your first one above!</div>`;
+    return;
+  }
+  list.innerHTML = arr.map(q => `
+    <div class="q-item">
+      <div class="q-item-text">${escHtml(q.text)}</div>
+      <div class="q-item-actions">
+        <button onclick="editCustomQ('${q.id}')">✏️</button>
+        <button onclick="deleteCustomQ('${q.id}')">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+function switchQTab(type) {
+  state.currentQTab = type;
+  document.getElementById('tabTruth').classList.toggle('active', type === 'truth');
+  document.getElementById('tabDare').classList.toggle('active', type === 'dare');
+  document.getElementById('addQLabel').textContent = type === 'truth' ? 'Add a Truth' : 'Add a Dare';
+  renderCustomQ();
+}
+
+function addCustomQ() {
+  const val = document.getElementById('newQInput').value.trim();
+  if (!val) return alert('Please enter a question');
+  const id = Date.now().toString();
+  const q = { id, text: val };
+  if (state.currentQTab === 'truth') state.customTruths.push(q);
+  else state.customDares.push(q);
+  document.getElementById('newQInput').value = '';
+  save();
+  renderCustomQ();
+}
+
+function deleteCustomQ(id) {
+  if (!confirm('Delete this question?')) return;
+  state.customTruths = state.customTruths.filter(x => x.id !== id);
+  state.customDares = state.customDares.filter(x => x.id !== id);
+  save();
+  renderCustomQ();
+}
+
+// ========== SETTINGS ==========
+function renderSettings() {
+  document.getElementById('soundToggle').checked = state.settings.sound;
+  document.getElementById('vibToggle').checked = state.settings.vibration;
+  setSegActive('sel', state.settings.selectionMode);
+  setSegActive('q', state.settings.questionMode);
+}
+function saveSetting(key, val) {
+  state.settings[key] = val;
+  save();
+}
+function setSegActive(prefix, val) {
+  const map = { sel: { wheel: 'selWheel' }, q: { default: 'qDefault', custom: 'qCustom', mixed: 'qMixed' } };
+  const group = map[prefix];
+  if (!group) return;
+  Object.values(group).forEach(id => document.getElementById(id)?.classList.remove('active'));
+  if (group[val]) document.getElementById(group[val])?.classList.add('active');
+}
+function confirmReset() {
+  if (confirm('Reset ALL data? This cannot be undone.')) {
+    state.players = []; state.customTruths = []; state.customDares = [];
+    state.recentQ = []; state.round = 1;
+    state.settings = { sound: true, vibration: true, selectionMode: 'wheel', questionMode: 'mixed' };
+    localStorage.removeItem('spindare');
+    save();
+    renderSettings();
+    alert('All data has been reset.');
+  }
+}
+
+// ========== OVERLAY ==========
+let _overlayCallback = null;
+function openOverlay(title, val, cb) {
+  _overlayCallback = cb;
+  document.getElementById('overlayTitle').textContent = title;
+  document.getElementById('overlayInput').value = val;
+  document.getElementById('editOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('overlayInput').focus(), 300);
+}
+function closeOverlay(e) {
+  if (e && e.target !== document.getElementById('editOverlay')) return;
+  document.getElementById('editOverlay').classList.remove('show');
+  _overlayCallback = null;
+}
+function saveOverlayEdit() {
+  const val = document.getElementById('overlayInput').value.trim();
+  if (_overlayCallback) _overlayCallback(val);
+  document.getElementById('editOverlay').classList.remove('show');
+  _overlayCallback = null;
+}
+
+// ========== SCOREBOARD ==========
+function renderScoreboard() {
+  const list = document.getElementById('scoreList');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!state.players || state.players.length === 0) {
+    list.innerHTML = '<div class="empty">No players yet.</div>';
+    return;
+  }
+  state.players.forEach((p, i) => {
+    const s = (state.scores && state.scores[p.id]) ? state.scores[p.id] : { done: 0, failed: 0 };
+    const li = document.createElement('li');
+    li.className = 'score-row';
+    li.innerHTML = `<div class="score-name">${escHtml(p.name)}</div><div class="score-counts">Done: ${s.done} • Not done: ${s.failed}</div>`;
+    list.appendChild(li);
+  });
+}
+
+function openScoreboard() {
+  renderScoreboard();
+  document.getElementById('scoreboardOverlay').classList.add('show');
+}
+
+function closeScoreboard() {
+  document.getElementById('scoreboardOverlay').classList.remove('show');
+}
+
+// ========== CELEBRATE ==========
+function celebrate() {
+  const container = document.getElementById('confetti');
+  container.innerHTML = '';
+  const colors = ['#a855f7','#ec4899','#3b82f6','#22c55e','#f59e0b','#ef4444','#ffffff'];
+  for (let i = 0; i < 60; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.width = (6 + Math.random() * 8) + 'px';
+    el.style.height = (6 + Math.random() * 8) + 'px';
+    el.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    el.style.animationDelay = Math.random() * 0.5 + 's';
+    container.appendChild(el);
+  }
+  setTimeout(() => container.innerHTML = '', 4000);
+}
+
+// ========== SOUND / VIBRATION ==========
+function vibrate() { if (state.settings.vibration && navigator.vibrate) navigator.vibrate(40); }
+let _audioCtx = null;
+function getAudioCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return _audioCtx;
+}
+function playTick() {
+  if (!state.settings.sound) return;
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(800, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 2.5);
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.5);
+    osc.start(); osc.stop(ctx.currentTime + 2.5);
+  } catch(e) {}
+}
+
+// ========== UTILS ==========
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ========== TRUTH/DARE SCREEN SETUP HOOK ==========
+const _origGoTo = goTo;
+// Patch goTo to run td setup
+window._goToOrig = goTo;
+window.goTo = function(id) {
+  _origGoTo(id);
+  if (id === 'tdScreen') setupTD();
+};
+
+// ========== INIT ==========
+load();
+setTimeout(() => {
+  goTo('home');
+  renderSettings();
+}, 1900);
+
+</script>
+</body>
+</html>
